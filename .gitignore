@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# delete files
+ML-project2/ressource_files/test_set_images
+ML-project2/ressource_files/training
