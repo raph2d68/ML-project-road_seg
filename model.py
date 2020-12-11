@@ -87,7 +87,7 @@ def variable_creation(train_data):
 def operation( train_data_node, train_labels_node, train_all_data_node, all_params_node, all_params_names, all_nodes, train_size ):
     
     # Training computation: logits + cross-entropy loss.
-    logits = model(train_data_node, all_nodes, True)  # BATCH_SIZE*NUM_LABELS
+    logits = model(train_data_node, all_nodes, False)  # BATCH_SIZE*NUM_LABELS
     # print 'logits = ' + str(logits.get_shape()) + ' train_labels_node = ' + str(train_labels_node.get_shape())
 
     #mesurer l'ecart entre variable catégrique entre ta proba et la realité
