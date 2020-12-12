@@ -3,6 +3,8 @@ from parameters import *
 from helper import *
 from model import model
 
+import matplotlib.pyplot as plt
+
 #opening followed by a closing
 #opening = erosion puis dilatation
 
@@ -14,148 +16,134 @@ from scipy import ndimage, misc
 
 
 
-
-
 def morphological_op( binary_image ):
-
-    #img = cv2.imread('j.png',0)
-
+    cv2.imwrite('1 binary input.jpg', binary_image*255)
     #define kernel dimension
     width=IMG_PATCH_SIZE
 
-    kernel_v = np.ones((width*5,width),np.uint8)
+    kernel_v = get_kernel(2*width, 0)
     kernel_v2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(width, 3*width))
     
-    
-    kernel_h = np.ones((width,width*5),np.uint8)
+    kernel_h = get_kernel(2*width, 90 )
     kernel_h2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3*width, width))
 
-    #opening followed by closing  
-    #closed_image = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, kernel)
-    
     #vertical ligne
-    opened_image_v = cv2.morphologyEx(binary_image, cv2.MORPH_OPEN, kernel_v)
-    close_image_v  = cv2.morphologyEx(opened_image_v, cv2.MORPH_CLOSE, kernel_v2)
-   
+    close_image_v  = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(width, width)))
+    cv2.imwrite('2 vertical_closing.jpg',close_image_v*255)
+    
+    opened_image_v = cv2.morphologyEx(close_image_v, cv2.MORPH_OPEN, get_kernel(3*width, 0))
+    cv2.imwrite('2 vertical_opening.jpg',opened_image_v*255)
+    
     #horizontal_image
-
-    opened_image_h = cv2.morphologyEx(binary_image, cv2.MORPH_OPEN, kernel_h) 
-    close_image_h  = cv2.morphologyEx(opened_image_h, cv2.MORPH_CLOSE, kernel_h2)
-
-    out = cv2.bitwise_or(close_image_v, close_image_h, mask = None) 
-
-    rho= 5
-    theta= 3.14/180
-    threshold=200
-    line = hough_op( out, rho, theta, threshold)
-
-    line=np.squeeze(line)
-    print("line", np.shape(line))
-        
-    tol=30
-
-    b=line[:,1]*360/(2*np.pi)
-    print(b)
-    b=b[b!=0]
-    b[b>90]=b[b>90]-90
-
+    close_image_h  = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(width, width)))
+    cv2.imwrite('3 horizontal_closing.jpg',close_image_h*255)
     
-    unique_angles=b[~(np.triu(np.abs(b[:,None] - b) <= tol,1)).any(0)]
-    
-    
-    print('b',unique_angles)
-    print(np.shape(unique_angles))
+    opened_image_h = cv2.morphologyEx(close_image_h, cv2.MORPH_OPEN, get_kernel(3*width, 90)) 
+    cv2.imwrite('3 horizontal_opening.jpg', opened_image_h*255)
 
-    #proper closing
-    if len(unique_angles)==2:
-        kernel_h_clean = get_kernel(2*width, unique_angles[0])
-        kernel_v_clean = get_kernel(2*width, unique_angles[1])
-        
-        print(kernel_h_clean)
-        print(kernel_v_clean)
-        close_image_h  = cv2.morphologyEx(close_image_h, cv2.MORPH_CLOSE, kernel_h_clean)
-        close_image_v  = cv2.morphologyEx(close_image_v, cv2.MORPH_CLOSE, kernel_v_clean)
-
-        sum = cv2.bitwise_or(close_image_v, close_image_h, mask = None) 
-
-
-        out =  cv2.morphologyEx(out, cv2.MORPH_CLOSE, kernel_v_clean)
-
-    return out
-    
-
-#rho	Distance resolution of the accumulator in pixels.
-#theta	Angle resolution of the accumulator in radians.
-#threshold	Accumulator threshold parameter. Only those lines are returned that get enough votes ( >threshold ).
-
-def hough_op(	image, rho, theta, threshold):
-
-    print(type(image))
-    print((len(image)))
-
-    imag2 = image.astype(np.uint8)
-
-    lines	= cv2.HoughLines(	imag2.copy(), rho, theta, threshold)
-    #lines =  HoughLinesP(imag2.copy(), 1, CV_PI/180, 50, 50, 10 )
-
-    print("longueru ligen", np.shape(lines))
-
-    for rho,theta in lines[0]:
-        a = np.cos(theta)
-        b = np.sin(theta)
-        x0 = a*rho
-        y0 = b*rho
-        x1 = int(x0 + 1000*(-b))
-        y1 = int(y0 + 1000*(a))
-        x2 = int(x0 - 1000*(-b))
-        y2 = int(y0 - 1000*(a))
-
+    sum_image = cv2.bitwise_or(opened_image_v, opened_image_h, mask = None) 
+    sum_image = np.uint8((sum_image*255))
    
-        cv2.line(imag2,(x1,y1),(x2,y2),(0,0,255),2)
-
-    cv2.imwrite('houghlines3.jpg',imag2)
+    #rho	Distance resolution of the accumulator in pixels.
+    #theta	Angle resolution of the accumulator in radians.
+    #threshold	Accumulator threshold parameter. Only those lines are returned that get enough votes ( >threshold ).
+    rho = 1  
+    theta = 3.14/360  
+    threshold = 150
+    cv2.imwrite('4 sum of opening and closing.jpg',sum_image)
    
-    print( lines) 
+    edges = cv2.Canny(sum_image, 5,100,apertureSize = 3)
+    cv2.imwrite('5 edge_detection.jpg',edges)
+    line = cv2.HoughLines(edges, 1, np.pi/360,150)
+    line = np.squeeze(line)
+    if np.size(line) > 1:
+        #convert rad to degree
+        b = line*360/(2*np.pi)
+        if np.size(b)==2:
+            b=np.array([b])
+        angles_means = get_mean_angle_values(b[:,1])
+        
+        #proper closing
+        #print("angle unique", angles_means)
+        idx_of_max_angle=find_max_values(angles_means, 2)
+        #print("idx_of_max_angle", idx_of_max_angle, 'type', type(idx_of_max_angle), "shape", np.shape(idx_of_max_angle) )
+        reduced_angles_means = [ angles_means[i] for i in idx_of_max_angle]
+        #print("reduced_unique_angle", reduced_angles_means)
 
-    return lines
+        for i, angle in enumerate(reduced_angles_means):
+            kernel_clean = get_kernel(3*width, angle)
+            out  = cv2.morphologyEx(sum_image, cv2.MORPH_CLOSE, kernel_clean)
+            #sum = cv2.bitwise_or(close_image_v, close_image_h, mask = None) 
+
+        cv2.imwrite('7 output.jpg',out)
+        return out/255
+    else:
+        print("no line hough detected")
+        return sum_image/255  
+
+
+def get_mean_angle_values( b ):
+
+    tol=TOL_ANGLE  
+    angles_mean=[]
+    i=0
+    full_len=len(b)
+    while len(b)>0 :  
+        smalltab=b[abs(b[0]-b)<tol]
+        if(len(smalltab)>(full_len/25)):
+            angles_mean.append(np.mean(smalltab))
+        b = b[abs(b[0]-b)>=tol]
+        i = i+1
+    
+    return angles_mean
+
+def find_max_values(array, nb_of_max):
+    
+    index=[]
+    np_array = np.array(array)
+    new_np_array = np_array.copy()
+    
+    for i in range (nb_of_max):
+        if len(new_np_array):
+            max_value=np.max(new_np_array)
+            max_idx=np.where(np_array==max_value)
+            index.append(max_idx[0][0])
+            mask=new_np_array!=np.max(new_np_array)
+            new_np_array=new_np_array[mask]
+  
+    return np.array(index)
 
 
 
 def get_kernel(width, angle):
 
-    ker = np.ones((width*3,width),np.uint8)
-
+    ker = np.ones((width, 10 ), np.uint8)
     rot_ker = ndimage.rotate(ker, 180-angle, reshape=True)
-
-
-    #return cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(width+1, width+1))
+    #print(" kernel for angle", angle, rot_ker  )
+  
+    #cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(width+1, width+1))
 
     return rot_ker
 
 
 def generate_output(s, filename, image_idx, all_nodes): 
     
-    
     imageid = "satImage_%.3d" % image_idx
     image_filename = filename + imageid + ".png"
     img = mpimg.imread(image_filename)
-
-    print("img_prediction IDX", image_idx)
-
+  
+    print("IMG Idx", image_idx)
 
     img_prediction = get_prediction(s, img, all_nodes)
-    
     img_prediction_processed = morphological_op(img_prediction)
     
     #with post_processing
-
     pimg = get_prediction_with_groundtruth(img, img_prediction_processed, image_idx)
     Image.fromarray(pimg).save(prediction_training_dir + "prediction_pp_" + str(image_idx) + ".png")
     oimg = get_prediction_with_overlay(img, img_prediction_processed, image_idx)
     oimg.save(prediction_training_dir + "overlay_pp_" + str(image_idx) + ".png")   
     
     #without  post_processing
-
     pimg = get_prediction_with_groundtruth(img, img_prediction, image_idx)
     Image.fromarray(pimg).save(prediction_training_dir + "prediction_" + str(image_idx) + ".png")
     oimg = get_prediction_with_overlay(img, img_prediction, image_idx)
@@ -167,7 +155,6 @@ def generate_output(s, filename, image_idx, all_nodes):
         # Get prediction for given input image 
 def get_prediction(s, img, all_nodes):
 
-    
     data = numpy.asarray(img_crop(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE))
     data_node = tf.constant(data)
  
@@ -180,18 +167,13 @@ def get_prediction(s, img, all_nodes):
 
 # Get a concatenation of the prediction and groundtruth for given input file
 def get_prediction_with_groundtruth(img, img_prediction, image_idx):
-
-   
     #print("img_prediction", img_prediction)
     cimg = concatenate_images(img, img_prediction)
-    
     return cimg
 
 
 
 # Get prediction overlaid on the original image for given input file
 def get_prediction_with_overlay(img, img_prediction, idx):
-    
-    oimg = make_img_overlay(img, img_prediction)
-    
+    oimg = make_img_overlay(img, img_prediction) 
     return oimg
