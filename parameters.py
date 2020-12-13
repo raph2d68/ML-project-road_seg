@@ -1,7 +1,7 @@
 NUM_CHANNELS = 3  # RGB images
 PIXEL_DEPTH = 255
 NUM_LABELS = 2
-TRAINING_SIZE = 20
+TRAINING_SIZE = 50
 VALIDATION_SIZE = 5  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16  # 64
@@ -15,7 +15,6 @@ RECORDING_STEP = 0
 IMG_PATCH_SIZE = 16
 
 POST_PROCESS = 0
-
-
+TOL_ANGLE = 30
 
 prediction_training_dir = "predictions_training/"
