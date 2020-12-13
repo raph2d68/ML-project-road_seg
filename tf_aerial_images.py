@@ -118,6 +118,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             print('Total number of iterations = ' + str(int(num_epochs * train_size / BATCH_SIZE)))
 
             training_indices = range(train_size)
+            print( "training_indices", training_indices)
 
             for iepoch in range(num_epochs):
 
@@ -169,7 +170,7 @@ def main(argv=None):  # pylint: disable=unused-argument
 
         print("Running prediction on training set")
         
-        prediction_training_dir = "predictions_training/"
+        
         
         if not os.path.isdir(prediction_training_dir):
             os.mkdir(prediction_training_dir)
