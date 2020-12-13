@@ -87,6 +87,10 @@ def img_crop(im, w, h):
             list_patches.append(im_patch)
     return list_patches
 
+tf.keras.layers.GaussianNoise(
+    stddev, **kwargs
+)
+
 
 data_dir = 'ressource_files/training/'
 train_data_filename = data_dir + 'images/'

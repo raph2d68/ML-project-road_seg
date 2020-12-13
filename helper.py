@@ -15,19 +15,6 @@ import tensorflow as tf
 from parameters import *
 
 
-# Assign a label to a patch v
-def value_to_class(v):
-    foreground_threshold = 0.25  # percentage of pixels > 1 required to assign a foreground label to a patch
-    df = numpy.sum(v)
-    if df > foreground_threshold:  # road
-        return [0, 1]
-    else:  # bgrd
-        return [1, 0]
-
-    
-    #1-hot = que des zeros sauf un 1
-
-
 def error_rate(predictions, labels):
     """Return the error rate based on dense predictions and 1-hot labels."""
     return 100.0 - (
