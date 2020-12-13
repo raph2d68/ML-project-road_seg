@@ -9,7 +9,7 @@ import code
 
 import tensorflow.python.platform
 
-import numpy
+import numpy as np
 import tensorflow as tf
 
 from parameters import *
@@ -19,14 +19,14 @@ def error_rate(predictions, labels):
     """Return the error rate based on dense predictions and 1-hot labels."""
     return 100.0 - (
         100.0 *
-        numpy.sum(numpy.argmax(predictions, 1) == numpy.argmax(labels, 1)) /
+        np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1)) /
         predictions.shape[0])
 
 
 # Write predictions from neural network to a file
 def write_predictions_to_file(predictions, labels, filename):
-    max_labels = numpy.argmax(labels, 1)
-    max_predictions = numpy.argmax(predictions, 1)
+    max_labels = np.argmax(labels, 1)
+    max_predictions = np.argmax(predictions, 1)
     file = open(filename, "w")
     n = predictions.shape[0]
     for i in range(0, n):
@@ -36,14 +36,14 @@ def write_predictions_to_file(predictions, labels, filename):
 
 # Print predictions from neural network
 def print_predictions(predictions, labels):
-    max_labels = numpy.argmax(labels, 1)
-    max_predictions = numpy.argmax(predictions, 1)
+    max_labels = np.argmax(labels, 1)
+    max_predictions = np.argmax(predictions, 1)
     print(str(max_labels) + ' ' + str(max_predictions))
 
 
 # Convert array of labels to an image
 def label_to_img(imgwidth, imgheight, w, h, labels):
-    array_labels = numpy.zeros([imgwidth, imgheight])
+    array_labels = np.zeros([imgwidth, imgheight])
     idx = 0
     for i in range(0, imgheight, h):
         for j in range(0, imgwidth, w):
@@ -58,8 +58,8 @@ def label_to_img(imgwidth, imgheight, w, h, labels):
 
 def img_float_to_uint8(img):
     
-    rimg = img - numpy.min(img)
-    rimg = (rimg / numpy.max(rimg) * PIXEL_DEPTH).round().astype(numpy.uint8)
+    rimg = img - np.min(img)
+    rimg = (rimg / np.max(rimg) * PIXEL_DEPTH).round().astype(np.uint8)
     return rimg
 
 
@@ -68,22 +68,22 @@ def concatenate_images(img, gt_img):
     w = gt_img.shape[0]
     h = gt_img.shape[1]
     if n_channels == 3:
-        cimg = numpy.concatenate((img, gt_img), axis=1)
+        cimg = np.concatenate((img, gt_img), axis=1)
     else:
-        gt_img_3c = numpy.zeros((w, h, 3), dtype=numpy.uint8)
+        gt_img_3c = np.zeros((w, h, 3), dtype=np.uint8)
         gt_img8 = img_float_to_uint8(gt_img)          
         gt_img_3c[:, :, 0] = gt_img8
         gt_img_3c[:, :, 1] = gt_img8
         gt_img_3c[:, :, 2] = gt_img8
         img8 = img_float_to_uint8(img)
-        cimg = numpy.concatenate((img8, gt_img_3c), axis=1)
+        cimg = np.concatenate((img8, gt_img_3c), axis=1)
     return cimg
 
 
 def make_img_overlay(img, predicted_img):
     w = img.shape[0]
     h = img.shape[1]
-    color_mask = numpy.zeros((w, h, 3), dtype=numpy.uint8)
+    color_mask = np.zeros((w, h, 3), dtype=np.uint8)
     color_mask[:, :, 0] = predicted_img*PIXEL_DEPTH
 
     img8 = img_float_to_uint8(img)
@@ -116,3 +116,12 @@ def get_image_summary_3d(img):
     V = tf.transpose(V, (2, 0, 1))
     V = tf.reshape(V, (-1, img_w, img_h, 1))
     return V
+
+
+def value_to_class(v):
+    foreground_threshold = 0.25  # percentage of pixels > 1 required to assign a foreground label to a patch
+    df = np.sum(v)
+    if df > foreground_threshold:  # road
+        return [0, 1]
+    else:  # bgrd
+        return [1, 0]

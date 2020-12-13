@@ -15,7 +15,9 @@ import urllib
 import matplotlib.image as mpimg
 from PIL import Image
 
+
 import code
+
 import tensorflow.python.platform
 
 import numpy
@@ -27,7 +29,6 @@ from parameters import *
 from post_processing import *
 from pre_processing import *
 
-
 tf.app.flags.DEFINE_string('train_dir', '/tmp/segment_aerial_images',
                            """Directory where to write event logs """
                            """and checkpoint.""")
@@ -36,12 +37,21 @@ FLAGS = tf.app.flags.FLAGS
 
 def main(argv=None):  # pylint: disable=unused-argument
 
-    data_dir = 'ressource_files/training/'
-
+    data_dir = 'ressource files/training/'
     train_data_filename = data_dir + 'images/'
     train_labels_filename = data_dir + 'groundtruth/' 
 
+    # Extract it into numpy arrays.
+
+
+    #ajouter une fonction pour selctionner les images d'entrée aléatoirement
+    #ou bien modifier extract data pour ajouter une randomization
+   
+    train_data, index = extract_data( train_data_filename, TRAINING_SIZE, RAND_TRAIN )
+    train_labels = extract_labels(train_labels_filename, index )
+
     num_epochs = NUM_EPOCHS
+
     
     # pour compter le nombre de point de background et de road
     c0 = 0  # bgrd
@@ -92,6 +102,7 @@ def main(argv=None):  # pylint: disable=unused-argument
 
     # Create a local session to run this computation.
     with tf.Session() as s:
+
         if RESTORE_MODEL:
             # Restore variables from disk.
             saver.restore(s, FLAGS.train_dir + "/model.ckpt")
