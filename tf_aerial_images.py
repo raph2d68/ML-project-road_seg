@@ -29,16 +29,13 @@ from parameters import *
 from post_processing import *
 from pre_processing import *
 
-tf.app.flags.DEFINE_string('train_dir', '/tmp/segment_aerial_images',
+tf.compat.v1.app.flags.DEFINE_string('train_dir', '/tmp/segment_aerial_images',
                            """Directory where to write event logs """
                            """and checkpoint.""")
-FLAGS = tf.app.flags.FLAGS
+FLAGS = tf.compat.v1.app.flags.FLAGS
 
 
 def main(argv=None):  # pylint: disable=unused-argument
-
-
-
 
 
     data_dir = 'ressource files/training/'
@@ -57,13 +54,15 @@ def main(argv=None):  # pylint: disable=unused-argument
 
     training_imgs, groundtruth_imgs = augment_data( train_data_filename, train_labels_filename, chosen_img_names )
     print("np.shape(training_imgs)", np.shape(training_imgs))
+    print("np.shape(groundtruth_imgs)", np.shape(groundtruth_imgs))
     
     train_data   =  create_patches( training_imgs )
-    print("np.shape(train_data)", np.shape(train_data))
+    print("np.shape(train_data)", np.shape(train_data), "type", type(train_data))
+    
     train_labels =  extract_labels( groundtruth_imgs )
-
+    print("np.shape(train_data)", np.shape(train_labels), "type", type(train_labels))
     num_epochs = NUM_EPOCHS
-
+    
     
     # pour compter le nombre de point de background et de road
     c0 = 0  # bgrd
@@ -86,7 +85,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     train_labels = train_labels[new_indices]
 
     train_size = train_labels.shape[0]
-    print("train_size", train_size)
+    print("train_size after balancing", train_size)
 
     c0 = 0
     c1 = 0
@@ -97,7 +96,8 @@ def main(argv=None):  # pylint: disable=unused-argument
             c1 = c1 + 1
     print('Number of data points per class: c0 = ' + str(c0) + ' c1 = ' + str(c1))
     
-   
+    print("np.shape(train_data)", np.shape(train_data), "type", type(train_data))
+    print("np.shape(train_data)", np.shape(train_labels), "type", type(train_labels))
 
     #creation de toutes les variables du modèle
     train_data_node, train_labels_node, train_all_data_node, all_params_node, all_params_names, all_nodes = variable_creation(train_data)    
@@ -106,14 +106,14 @@ def main(argv=None):  # pylint: disable=unused-argument
     optimizer, loss, learning_rate, train_prediction  = operation( train_data_node, train_labels_node, train_all_data_node, all_params_node, all_params_names, all_nodes, train_size)
 
     # Add ops to save and restore all the variables.
-    saver = tf.train.Saver()
+    saver = tf.compat.v1.train.Saver()
 
 
     #fonction test juste pour print les nodes weight de conv 1
-    wei=tf.print(all_nodes["conv1_w"][:,:,:,0],[all_nodes["conv1_w"][:,:,:,0]]," this is te conv1")
+    #wei=tf.print(all_nodes["conv1_w"][:,:,:,0],[all_nodes["conv1_w"][:,:,:,0]]," this is te conv1")
 
     # Create a local session to run this computation.
-    with tf.Session() as s:
+    with tf.compat.v1.Session() as s:
 
         if RESTORE_MODEL:
             # Restore variables from disk.
@@ -122,11 +122,11 @@ def main(argv=None):  # pylint: disable=unused-argument
 
         else:
             # Run all the initializers to prepare the trainable parameters.
-            tf.global_variables_initializer().run()
+            tf.compat.v1.global_variables_initializer().run()
 
             # Build the summary operation based on the TF collection of Summaries.
-            summary_op = tf.summary.merge_all()
-            summary_writer = tf.summary.FileWriter(FLAGS.train_dir,
+            summary_op = tf.compat.v1.summary.merge_all()
+            summary_writer = tf.compat.v1.summary.FileWriter(FLAGS.train_dir,
                                                    graph=s.graph)
             print("summary done at",FLAGS.train_dir)
 
@@ -177,9 +177,9 @@ def main(argv=None):  # pylint: disable=unused-argument
                         _, l, lr, predictions= s.run(
                             [optimizer, loss, learning_rate, train_prediction ],
                             feed_dict=feed_dict)
-                        if step==steps_per_epoch:
-                            print('Epoch %d' % iepoch, 'step %d', step)
-                            _=s.run(wei)
+                        #if step==steps_per_epoch:
+                            #print('Epoch %d' % iepoch, 'step %d', step)
+                            #_=s.run(wei)
 
                 # Save the variables to disk.
                 save_path = saver.save(s, FLAGS.train_dir + "/model.ckpt")
@@ -200,4 +200,4 @@ def main(argv=None):  # pylint: disable=unused-argument
 
 
 if __name__ == '__main__':
-    tf.app.run()
+    tf.compat.v1.app.run()

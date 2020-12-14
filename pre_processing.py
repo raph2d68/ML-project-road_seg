@@ -64,6 +64,7 @@ def create_patches( data ):
 
 # Extract label images
 def extract_labels( data ):
+   
     """Extract the labels into a 1-hot matrix [image index, label index]."""
     gt_imgs = np.array(data)
 
@@ -114,6 +115,7 @@ def augment_data( train_data_filename, train_labels_filename, names ):
 
     training_imgs    =  load_image(train_data_filename, names)
     groundtruth_imgs =  load_image(train_labels_filename, names)
+   
 
     augmented_imgs = training_imgs
     augmented_gt_imgs = groundtruth_imgs   
@@ -122,47 +124,72 @@ def augment_data( train_data_filename, train_labels_filename, names ):
     rot90 = np.rot90( training_imgs, k=1, axes=(1, 2))
     rot90_gt = np.rot90( groundtruth_imgs, k=1, axes=(1, 2))
     
+    #cv2.imwrite('prepro/90.jpg',rot90[0]*255)
+    #cv2.imwrite('prepro/90gt.jpg',rot90_gt[0]*255)
    
     #rot180
     rot180 = np.rot90( training_imgs, k=2, axes=(1, 2))
     rot180_gt = np.rot90( groundtruth_imgs, k=2, axes=(1, 2))
-   
+    
+    #print(np.shape(rot180[0]))
+    #print("rot180_gt", np.shape(rot180_gt[0]))
+    #cv2.imwrite('prepro/180.jpg',rot180[0]*255)
+    #cv2.imwrite('prepro/180_gt.jpg',rot180_gt[0]*255)
 
     #rot270
     rot270 = np.rot90( training_imgs, k=3, axes=(1, 2))
     rot270_gt = np.rot90( groundtruth_imgs, k=3, axes=(1, 2))
+    #cv2.imwrite('prepro/befgrey.jpg',rot90[0])
+    #cv2.imwrite('prepro/befgrey.jpg',rot90_gt[0])
    
 
     #vertical flip
     flipud = np.flip( training_imgs,  1 )
     flipud_gt = np.flip( groundtruth_imgs, 1 )
+    #cv2.imwrite('prepro/befgrey.jpg',rot90[0])
+    #cv2.imwrite('prepro/befgrey.jpg',rot90_gt[0])
+    #cv2.imwrite('prepro/flipud.jpg',flipud[0]*255)
+    #cv2.imwrite('prepro/flipud_gt.jpg',flipud_gt[0]*255)
    
 
     #horizontal flip
     fliplr =    np.flip( training_imgs,  2 )
     fliplr_gt = np.flip( groundtruth_imgs, 2 )
+    #cv2.imwrite('prepro/befgrey.jpg',rot90[0])
+    #cv2.imwrite('prepro/befgrey.jpg',rot90_gt[0])
+    #cv2.imwrite('prepro/fliplr.jpg',fliplr[0]*255)
+    #cv2.imwrite('prepro/fliplr_gt.jpg',fliplr_gt[0]*255)
    
 
     #45° flip
     flip45 =    flip_to_45( training_imgs )
     flip45_gt = flip_to_45( groundtruth_imgs )
+    #cv2.imwrite('prepro/befgrey.jpg',rot90[0])
+    #cv2.imwrite('prepro/befgrey.jpg',rot90_gt[0])
+    #cv2.imwrite('prepro/flip45.jpg',flip45[0]*255)
+    #cv2.imwrite('prepro/flip45_gt.jpg',flip45_gt[0]*255)
   
     
     #135° flip
     flip135 =    flip_to_135( training_imgs )
     flip135_gt = flip_to_135( groundtruth_imgs )
+    #cv2.imwrite('prepro/befgrey.jpg',rot90[0])
+    #cv2.imwrite('prepro/befgrey.jpg',rot90_gt[0])
+    #cv2.imwrite('prepro/flip135.jpg',flip135[0]*255)
+    #cv2.imwrite('prepro/flip135_gt.jpg',flip135_gt[0]*255)
   
 
     #gaussian noise
-    gauss =     add_gaussian_noise( training_imgs )
-    gauss_gt =  add_gaussian_noise( groundtruth_imgs )
+    #gauss =     add_gaussian_noise( training_imgs )
+    #gauss_gt =  add_gaussian_noise( groundtruth_imgs )
   
 
 
-    augmented_imgs = np.concatenate((rot90, rot180, rot270, flipud, fliplr, flip45, flip135, gauss), axis=0, out=None)
-    augmented_gt_imgs = np.concatenate((rot90_gt, rot180_gt, rot270_gt, flipud_gt, fliplr_gt, flip45_gt, flip135_gt, gauss_gt), axis=0, out=None)
+    augmented_imgs = np.concatenate((augmented_imgs, rot90, rot180, rot270, flipud, fliplr, flip45, flip135), axis=0, out=None)
+    augmented_gt_imgs = np.concatenate((augmented_gt_imgs, rot90_gt, rot180_gt, rot270_gt, flipud_gt, fliplr_gt, flip45_gt, flip135_gt), axis=0, out=None)
 
-
+    #print("augmented_imgs", augmented_imgs)
+    #print("augmented_gt_imgs",augmented_gt_imgs)
     return  augmented_imgs, augmented_gt_imgs 
 
 def add_gaussian_noise(images):

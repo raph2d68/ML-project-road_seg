@@ -1,6 +1,7 @@
 
 from parameters import *
 from helper import *
+from pre_processing import *
 from model import model
 
 import matplotlib.pyplot as plt
@@ -17,69 +18,72 @@ from scipy import ndimage, misc
 
 
 def morphological_op( binary_image ):
-    cv2.imwrite('1 binary input.jpg', binary_image*255)
-    #define kernel dimension
-    width=IMG_PATCH_SIZE
+    if POST_PROCESS:
+        cv2.imwrite('1 binary input.jpg', binary_image*255)
+        #define kernel dimension
+        width=IMG_PATCH_SIZE
 
-    kernel_v = get_kernel(2*width, 0)
-    kernel_v2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(width, 3*width))
-    
-    kernel_h = get_kernel(2*width, 90 )
-    kernel_h2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3*width, width))
-
-    #vertical ligne
-    close_image_v  = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(width, width)))
-    cv2.imwrite('2 vertical_closing.jpg',close_image_v*255)
-    
-    opened_image_v = cv2.morphologyEx(close_image_v, cv2.MORPH_OPEN, get_kernel(3*width, 0))
-    cv2.imwrite('2 vertical_opening.jpg',opened_image_v*255)
-    
-    #horizontal_image
-    close_image_h  = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(width, width)))
-    cv2.imwrite('3 horizontal_closing.jpg',close_image_h*255)
-    
-    opened_image_h = cv2.morphologyEx(close_image_h, cv2.MORPH_OPEN, get_kernel(3*width, 90)) 
-    cv2.imwrite('3 horizontal_opening.jpg', opened_image_h*255)
-
-    sum_image = cv2.bitwise_or(opened_image_v, opened_image_h, mask = None) 
-    sum_image = np.uint8((sum_image*255))
-   
-    #rho	Distance resolution of the accumulator in pixels.
-    #theta	Angle resolution of the accumulator in radians.
-    #threshold	Accumulator threshold parameter. Only those lines are returned that get enough votes ( >threshold ).
-    rho = 1  
-    theta = 3.14/360  
-    threshold = 150
-    cv2.imwrite('4 sum of opening and closing.jpg',sum_image)
-   
-    edges = cv2.Canny(sum_image, 5,100,apertureSize = 3)
-    cv2.imwrite('5 edge_detection.jpg',edges)
-    line = cv2.HoughLines(edges, 1, np.pi/360,150)
-    line = np.squeeze(line)
-    if np.size(line) > 1:
-        #convert rad to degree
-        b = line*360/(2*np.pi)
-        if np.size(b)==2:
-            b=np.array([b])
-        angles_means = get_mean_angle_values(b[:,1])
+        kernel_v = get_kernel(2*width, 0)
+        kernel_v2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(width, 3*width))
         
-        #proper closing
-        #print("angle unique", angles_means)
-        idx_of_max_angle=find_max_values(angles_means, 2)
-        #print("idx_of_max_angle", idx_of_max_angle, 'type', type(idx_of_max_angle), "shape", np.shape(idx_of_max_angle) )
-        reduced_angles_means = [ angles_means[i] for i in idx_of_max_angle]
-        #print("reduced_unique_angle", reduced_angles_means)
+        kernel_h = get_kernel(2*width, 90 )
+        kernel_h2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3*width, width))
 
-        for i, angle in enumerate(reduced_angles_means):
-            kernel_clean = get_kernel(3*width, angle)
-            out  = cv2.morphologyEx(sum_image, cv2.MORPH_CLOSE, kernel_clean)
-            #sum = cv2.bitwise_or(close_image_v, close_image_h, mask = None) 
+        #vertical ligne
+        close_image_v  = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(width, width)))
+        cv2.imwrite('2 vertical_closing.jpg',close_image_v*255)
+        
+        opened_image_v = cv2.morphologyEx(close_image_v, cv2.MORPH_OPEN, get_kernel(3*width, 0))
+        cv2.imwrite('2 vertical_opening.jpg',opened_image_v*255)
+        
+        #horizontal_image
+        close_image_h  = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(width, width)))
+        cv2.imwrite('3 horizontal_closing.jpg',close_image_h*255)
+        
+        opened_image_h = cv2.morphologyEx(close_image_h, cv2.MORPH_OPEN, get_kernel(3*width, 90)) 
+        cv2.imwrite('3 horizontal_opening.jpg', opened_image_h*255)
 
-        cv2.imwrite('7 output.jpg',out)
-        return out/255
-    else:
-        print("no line hough detected")
-        return sum_image/255  
+        sum_image = cv2.bitwise_or(opened_image_v, opened_image_h, mask = None) 
+        sum_image = np.uint8((sum_image*255))
+    
+        #rho	Distance resolution of the accumulator in pixels.
+        #theta	Angle resolution of the accumulator in radians.
+        #threshold	Accumulator threshold parameter. Only those lines are returned that get enough votes ( >threshold ).
+        rho = 1  
+        theta = 3.14/360  
+        threshold = 150
+        cv2.imwrite('4 sum of opening and closing.jpg',sum_image)
+    
+        edges = cv2.Canny(sum_image, 5,100,apertureSize = 3)
+        cv2.imwrite('5 edge_detection.jpg',edges)
+        line = cv2.HoughLines(edges, 1, np.pi/360,150)
+        line = np.squeeze(line)
+        if np.size(line) > 1:
+            #convert rad to degree
+            b = line*360/(2*np.pi)
+            if np.size(b)==2:
+                b=np.array([b])
+            angles_means = get_mean_angle_values(b[:,1])
+            
+            #proper closing
+            #print("angle unique", angles_means)
+            idx_of_max_angle=find_max_values(angles_means, 2)
+            #print("idx_of_max_angle", idx_of_max_angle, 'type', type(idx_of_max_angle), "shape", np.shape(idx_of_max_angle) )
+            reduced_angles_means = [ angles_means[i] for i in idx_of_max_angle]
+            #print("reduced_unique_angle", reduced_angles_means)
+
+            for i, angle in enumerate(reduced_angles_means):
+                kernel_clean = get_kernel(3*width, angle)
+                out  = cv2.morphologyEx(sum_image, cv2.MORPH_CLOSE, kernel_clean)
+                #sum = cv2.bitwise_or(close_image_v, close_image_h, mask = None) 
+
+            cv2.imwrite('7 output.jpg',out)
+            return out/255
+        else:
+            print("no line hough detected")
+            return sum_image/255  
+        
+    return binary_image
 
 
 def get_mean_angle_values( b ):
@@ -155,7 +159,7 @@ def generate_output(s, filename, image_idx, all_nodes):
         # Get prediction for given input image 
 def get_prediction(s, img, all_nodes):
 
-    data = numpy.asarray(img_crop(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE))
+    data = np.asarray(img_crop(img, IMG_PATCH_SIZE, IMG_PATCH_SIZE))
     data_node = tf.constant(data)
  
     output = tf.nn.softmax(model(data_node, all_nodes))
