@@ -16,39 +16,41 @@ import tensorflow as tf
 from scipy import ndimage, misc
 
 
-def load_image(infilename):
-    data = mpimg.imread(infilename)
-    return data
-
-def extract_data(filename, num_images, rand_bool=False):
-
-    """Extract the images into a 4D tensor [image index, y, x, channels].
-    Values are rescaled from [0, 255] down to [-0.5, 0.5].
-    """
-    imgs = []
-
-    print("randbool", rand_bool)
-
-    if rand_bool:
-        nb_of_images = len(glob.glob(filename + "satImage*.png"))
-        training_images_indices = range(nb_of_images)
-        index = np.random.permutation(training_images_indices)[0:num_images]
-        print("index rand", index)
-    else: 
-        index = range(1, num_images+1)
-        print("index", index)
-
-
-    for i, idx in enumerate(index) :
-        imageid = "satImage_%.3d" % idx
-        image_filename = filename + imageid + ".png"
+def load_image(filename, names):
+    imgs=[]
+    for i, idx in enumerate(names) :
+        imageid = names[i]
+        image_filename = filename + imageid 
         if os.path.isfile(image_filename):
             print('Loading ' + image_filename)
-            img = load_image(image_filename)
+            img = mpimg.imread(image_filename)
             imgs.append(img)
         else:
             print('File ' + image_filename + ' does not exist')
+  
+    return imgs
 
+
+def get_data_names( train_data_filename, TRAINING_SIZE, rand_bool ):
+
+    names = [os.path.basename(x) for x in glob.glob( train_data_filename +'satImage*.png')]
+    
+    if rand_bool:
+        names = np.random.permutation(names)[0:TRAINING_SIZE]
+    else: 
+        names = names[0:TRAINING_SIZE]
+
+    print(names)
+    return names
+
+
+
+def create_patches( data ):
+
+    imgs=np.array(data)
+    """Extract the images into a 4D tensor [image index, y, x, channels].
+    Values are rescaled from [0, 255] down to [-0.5, 0.5].
+    """
     num_images = len(imgs)
     IMG_WIDTH = imgs[0].shape[0]
     IMG_HEIGHT = imgs[0].shape[1]
@@ -57,22 +59,13 @@ def extract_data(filename, num_images, rand_bool=False):
     img_patches = [img_crop(imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_images)]
     data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
 
-    return np.asarray(data), index
+    return np.asarray(data)
 
 
 # Extract label images
-def extract_labels(filename, index ):
+def extract_labels( data ):
     """Extract the labels into a 1-hot matrix [image index, label index]."""
-    gt_imgs = []
-    for i, idx in enumerate(index) :
-        imageid = "satImage_%.3d" % idx
-        image_filename = filename + imageid + ".png"
-        if os.path.isfile(image_filename):
-            print('Loading ' + image_filename)
-            img = mpimg.imread(image_filename)
-            gt_imgs.append(img)
-        else:
-            print('File ' + image_filename + ' does not exist')
+    gt_imgs = np.array(data)
 
     num_images = len(gt_imgs)
     gt_patches = [img_crop(gt_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_images)]
@@ -114,59 +107,76 @@ groundt_dir = data_dir + 'groundtruth/'
 
 files = os.listdir(image_dir) #return list of files of a directory
 
-images_list = [load_image(image_dir + files[i]) for i in range(TRAINING_SIZE)] # create list of the names of the images 
-groundt_list = [load_image(groundt_dir + files[i]) for i in range(TRAINING_SIZE)]   # create list of the names of the groundtruth (images and groundtruth names are the same)
+''' 
+def augment_data( train_data_filename, train_labels_filename, names ):
 
-num_aug = TRAINING_SIZE + 1 
+  
 
-for i in range(TRAINING_SIZE) :
+    training_imgs    =  load_image(train_data_filename, names)
+    groundtruth_imgs =  load_image(train_labels_filename, names)
 
-    # load images
-    img = images_list[i]
-    groundt = groundt_list[i]
+    augmented_imgs = training_imgs
+    augmented_gt_imgs = groundtruth_imgs   
 
     #rot90
-    rot90_i = tf.image.rot90(img)
-    rot90_gt = tf.image.rot90(groundt)
-    plt.imsave(image_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', rot90_i)
-    plt.imsave(groundt_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', rot90_gt, cmap='Greys_r')
-    num_aug+=1
-
+    rot90 = np.rot90( training_imgs, k=1, axes=(1, 2))
+    rot90_gt = np.rot90( groundtruth_imgs, k=1, axes=(1, 2))
+    
+   
     #rot180
-    rot180_i = tf.image.rot90(rot90_i)
-    rot180_gt = tf.image.rot90(rot90_gt)
-    plt.imsave(image_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', rot180_i)
-    plt.imsave(groundt_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', rot180_gt, cmap='Greys_r')
-    num_aug+=1
+    rot180 = np.rot90( training_imgs, k=2, axes=(1, 2))
+    rot180_gt = np.rot90( groundtruth_imgs, k=2, axes=(1, 2))
+   
 
     #rot270
-    rot270_i = tf.image.rot90(rot180_i)
-    rot270_gt = tf.image.rot90(rot180_gt)
-    plt.imsave(image_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', rot270_i)
-    plt.imsave(groundt_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', rot270_gt, cmap='Greys_r')
-    num_aug+=1
+    rot270 = np.rot90( training_imgs, k=3, axes=(1, 2))
+    rot270_gt = np.rot90( groundtruth_imgs, k=3, axes=(1, 2))
+   
 
     #vertical flip
-    plt.imsave(image_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', tf.image.flip_left_right(img))
-    plt.imsave(groundt_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', tf.image.flip_left_right(groundt), cmap='Greys_r')
-    num_aug+=1
-
+    flipud = np.flip( training_imgs,  1 )
+    flipud_gt = np.flip( groundtruth_imgs, 1 )
+   
 
     #horizontal flip
-    plt.imsave(image_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', tf.image.flip_up_down(img))
-    plt.imsave(groundt_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', tf.image.flip_up_down(groundt), cmap='Greys_r')
-    num_aug+=1
+    fliplr =    np.flip( training_imgs,  2 )
+    fliplr_gt = np.flip( groundtruth_imgs, 2 )
+   
 
     #45° flip
-    plt.imsave(image_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', tf.image.rot270(tf.image.flip_up_down(rot90_i)))
-    plt.imsave(groundt_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', tf.image.rot270(tf.image.flip_up_down(rot90_gt)), cmap='Greys_r')
+    flip45 =    flip_to_45( training_imgs )
+    flip45_gt = flip_to_45( groundtruth_imgs )
+  
+    
+    #135° flip
+    flip135 =    flip_to_135( training_imgs )
+    flip135_gt = flip_to_135( groundtruth_imgs )
+  
 
-    #270° flip
-    plt.imsave(image_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', tf.image.rot270(tf.image.flip_up_down(rot270_i)))
-    plt.imsave(groundt_dir + 'satImage_' + str(num_aug).zfill(4) + '.png', tf.image.rot270(tf.image.flip_up_down(rot270_gt)), cmap='Greys_r')
+    #gaussian noise
+    gauss =     add_gaussian_noise( training_imgs )
+    gauss_gt =  add_gaussian_noise( groundtruth_imgs )
+  
 
-    #add noise 
 
-    #Centering
+    augmented_imgs = np.concatenate((rot90, rot180, rot270, flipud, fliplr, flip45, flip135, gauss), axis=0, out=None)
+    augmented_gt_imgs = np.concatenate((rot90_gt, rot180_gt, rot270_gt, flipud_gt, fliplr_gt, flip45_gt, flip135_gt, gauss_gt), axis=0, out=None)
 
-'''
+
+    return  augmented_imgs, augmented_gt_imgs 
+
+def add_gaussian_noise(images):
+    noise = np.random.normal(0, .1, np.shape(images))
+    noise_img = images + np.int_(noise*255)
+    #eventuellement ajouter un clip
+    return noise_img
+
+def flip_to_45(images):
+    fliplr = np.flip(images, 2)
+    out = np.rot90(fliplr, k=1, axes=(1, 2)) 
+    return out
+
+def flip_to_135(image):
+    flipud = np.flip(image, 1)
+    out = np.rot90(flipud, k=1, axes=(1, 2)) 
+    return out 

@@ -37,18 +37,30 @@ FLAGS = tf.app.flags.FLAGS
 
 def main(argv=None):  # pylint: disable=unused-argument
 
+
+
+
+
     data_dir = 'ressource files/training/'
     train_data_filename = data_dir + 'images/'
     train_labels_filename = data_dir + 'groundtruth/' 
+
+    
 
     # Extract it into numpy arrays.
 
 
     #ajouter une fonction pour selctionner les images d'entrée aléatoirement
     #ou bien modifier extract data pour ajouter une randomization
-   
-    train_data, index = extract_data( train_data_filename, TRAINING_SIZE, RAND_TRAIN )
-    train_labels = extract_labels(train_labels_filename, index )
+
+    chosen_img_names = get_data_names( train_data_filename, TRAINING_SIZE, RAND_TRAIN )
+
+    training_imgs, groundtruth_imgs = augment_data( train_data_filename, train_labels_filename, chosen_img_names )
+    print("np.shape(training_imgs)", np.shape(training_imgs))
+    
+    train_data   =  create_patches( training_imgs )
+    print("np.shape(train_data)", np.shape(train_data))
+    train_labels =  extract_labels( groundtruth_imgs )
 
     num_epochs = NUM_EPOCHS
 
