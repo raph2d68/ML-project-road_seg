@@ -6,6 +6,7 @@ import matplotlib.image as mpimg
 from PIL import Image
 
 import code
+import matplotlib as plt
 
 import tensorflow.python.platform
 
@@ -14,6 +15,8 @@ import tensorflow as tf
 
 from parameters import *
 
+def get_image(img):
+    return mpimg.imread(img)
 
 def error_rate(predictions, labels):
     """Return the error rate based on dense predictions and 1-hot labels."""
@@ -125,3 +128,16 @@ def value_to_class(v):
         return [0, 1]
     else:  # bgrd
         return [1, 0]
+
+def f1_scores(epo_hist):
+    """ F1_scores from the epoch history of the model"""
+    pre = np.array(epo_hist.history['precision'])
+    rec = np.array(epo_hist.history['recall'])
+    return 2 * pre * rec / (pre + rec)
+
+def plot_metric_history(f1_scores):
+    plt.plot(f1_scores)
+    plt.xlabel('# epochs')
+    plt.ylabel('F1-Score')
+    plt.title('F1-Score for every epochs')
+    plt.savefig('F1-Scores.png')
