@@ -18,16 +18,21 @@ def main(argv=None):
     imgs, grth_imgs = augment_data(train_image_dir, train_grth_dir, chosen_img_names)
     
     print('imgs shape', imgs.shape)
-    print('grth shape', grth.shape)
+    print('grth shape', grth_imgs.shape)
+    n = imgs.shape[0]
+    m = grth_imgs.shape[0]
     
-    x_train = np.asarray(imgs)
-    y_train = np.expand_dims(np.asarray(grth_imgs), axis=3)
+    list_imgs = [imgs[i, :, :, :] for i in range(n)]
+    list_grth_imgs = [grth_imgs[i, :, :] for i in range(m)]
+    
+    x_train = np.asarray(list_imgs)
+    y_train = np.expand_dims(np.asarray(list_grth_imgs), axis=3)
 
     # Create Model - refer to parameters.py for details
     model = unet_model(IMG_SIZE, NUM_CHANNELS, NUM_FILTER, FILTER_SIZE, dropout=0.5)
 
     # Run Model
-    model, f1_scores = train_model(model, x_train, y_train, BATCH_SIZE, NUM_EPOCHS, valid_split)
+    model, f1_scores = train_model(model, x_train, y_train, BATCH_SIZE, NUM_EPOCHS)
 
     # Save the trained model
     print('Saving trained model')

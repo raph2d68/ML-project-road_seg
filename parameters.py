@@ -5,7 +5,7 @@ TRAINING_SIZE = 90 #max
 VALIDATION_SIZE = 10  # Size of the validation set.
 SEED = 66478  # Set to None for random seed.
 BATCH_SIZE = 16  # 64
-NUM_EPOCHS = 200
+NUM_EPOCHS = 1
 RESTORE_MODEL = False  # If True, restore existing model instead of training a new one
 RECORDING_STEP = 0
 
