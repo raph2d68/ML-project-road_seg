@@ -1,7 +1,7 @@
 ***
 # Road Segmentation Project
 
-   This repository is a Machine Learning project that aims to detect roads from a set of satellite images. It implements a U-Net algoritm that classifies the input of RGB images set, assigning either the label "road" or "background" to each pixel. A training set of 100 satellite road images (400x400 pixels), with their corresponding groundtruths was used. As a test set we used 50 unlabeled satellite road images (608x608 pixels).
+This repository is a Machine Learning project that aims to detect roads from a set of satellite images. It implements a U-Net algoritm that classifies the input of RGB images set, assigning either the label "road" or "background" to each pixel. A training set of 100 satellite road images (400x400 pixels), with their corresponding groundtruths was used. As a test set we used 50 unlabeled satellite road images (608x608 pixels).
 
 ***
 # Files Details
@@ -70,14 +70,15 @@ Now you can either make a submission, or simply make a prediction
 **1. Run prediction separately from submission**
 
 
-Run the prediction, and run post-processing if enabled.
+Run the prediction, and run post-processing if enabled in order to update ressource_files/prediction images.
 ```
 $ python prediction.py 
 ```
 
 **2. Run prediction, and make a submission from test images**
 
-Run the complete project
+In order to obtain the csv file of our final_submission, use **run.py** without post_processing.
+That will gather images from the ressource_files/prediction folder and generate a submission file.
 ```
 $ python run.py
 ```
@@ -98,9 +99,12 @@ $ python run.py
 
 # Reference
 
-### GitHub repositories
+[Unet architecture](https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/)
 
+### GitHub repositories
 
 [EPFML_Project2](https://github.com/ntalabot/EPFML_Project2) 
 
 [EPFL-Machine-Learning-Road-Segmentation](https://https://github.com/zghonda/EPFL-Machine-Learning-Road-Segmentation.google.com) 
+
+
