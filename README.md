@@ -8,7 +8,7 @@ This repository is a learning machine project that aims to detect roads from a s
 
 ## Images : 
 
-- **Ressource_folder** contains the test and train images, with their groundtruth.
+- **ressource_files** contains the test and train images, with their groundtruth.
 
 - **prediction** is a subfolder in the above mentioned that contains the images used for the final prediction.
 
