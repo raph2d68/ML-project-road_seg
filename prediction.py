@@ -30,7 +30,7 @@ def main(argv=None):
     model = keras.models.load_model(PATH_model)
 
     for idx, path in enumerate(img_test):    
-        print(idx)
+       
         img = np.squeeze(get_image(path))
         pred = img_predict(img, model)
         pred = np.squeeze(pred).round()
