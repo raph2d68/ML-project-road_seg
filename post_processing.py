@@ -110,16 +110,16 @@ def get_kernel(height , width,  angle):
 def generate_output(image_idx, img, img_prediction ): 
     
     print("IMG Idx prediction", image_idx)
-    dir_supp_images = prediction_training_dir + "prediction/"
+    dir_supp_images = PATH_PREDICTION_DIR + "visual/"
     os.makedirs(dir_supp_images , exist_ok=True)
-    os.makedirs(prediction_training_dir, exist_ok=True)
+    os.makedirs(PATH_PREDICTION_DIR, exist_ok=True)
     
     img_prediction_postprocessed = morphological_op(img_prediction)
     
     #with post_processing
     if POST_PROCESS:
         Image.fromarray(img_float_to_uint8(img_prediction_postprocessed)).save(
-                                            prediction_training_dir + "prediction_pp_" + str(image_idx+1) + ".png")
+                                            PATH_PREDICTION_DIR + "prediction_pp_" + str(image_idx+1) + ".png")
         pimg = concatenate_images(img, img_float_to_uint8(img_prediction_postprocessed))
         Image.fromarray(pimg).save(dir_supp_images + "prediction_pp_" + str(image_idx+1) + ".png")
         oimg = make_img_overlay(img, img_prediction_postprocessed)
@@ -127,7 +127,7 @@ def generate_output(image_idx, img, img_prediction ):
     else : 
         #without post_processing
         Image.fromarray(img_float_to_uint8(img_prediction)).save(
-                                                prediction_training_dir + "prediction_" + str(image_idx+1) + ".png")
+                                                PATH_PREDICTION_DIR + "prediction_" + str(image_idx+1) + ".png")
         pimg = concatenate_images(img, img_prediction)
         Image.fromarray(pimg).save(dir_supp_images + "prediction_" + str(image_idx+1) + ".png")
         
