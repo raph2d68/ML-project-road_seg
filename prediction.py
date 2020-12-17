@@ -26,7 +26,7 @@ def img_predict(img, model):
 
 def main(argv=None): 
 
-    img_test = [PATH_TEST_DATA + 'test_' + str(i+1 ) + '/' + 'test_' + str(i + 1) + '.png' for i in range(4)]
+    img_test = [PATH_TEST_DATA + 'test_' + str(i+1 ) + '/' + 'test_' + str(i + 1) + '.png' for i in range(50)]
     model = keras.models.load_model(PATH_model)
 
     for idx, path in enumerate(img_test):    
