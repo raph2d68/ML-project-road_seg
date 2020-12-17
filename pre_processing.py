@@ -92,19 +92,31 @@ def augment_data( train_data_filename, train_labels_filename, names ):
     gauss =     add_gaussian_noise( training_imgs )
     gauss_gt =  groundtruth_imgs
 
-    #rotation a 45°
+    #rotation 45°
     rot45    = imrot(training_imgs,45)
     rot45_gt = gtrot(groundtruth_imgs,45)
 
-    #rotation a -45°
+    #rotation -45°
     rot315    = imrot(training_imgs,-45)
     rot315_gt = gtrot(groundtruth_imgs,-45)
-    
-    augmented_imgs    = np.concatenate((augmented_imgs, rot90, rot180, rot270, flipud, fliplr, 
-                                                flip45, flip135, gauss, rot45, rot315 ), axis=0, out=None)
 
-    augmented_gt_imgs = np.concatenate((augmented_gt_imgs, rot90_gt, rot180_gt, rot270_gt, flipud_gt, fliplr_gt, 
-                                                flip45_gt, flip135_gt, gauss_gt, rot45_gt, rot315_gt), axis=0, out=None)
+    ''' These 3 augmentations have been added after deadline'''
+    #rotation 15° without resizing
+    rot15    = rotate(training_imgs, axes = (1,2), angle=15, reshape=False)
+    rot15_gt = rotate(groundtruth_imgs, axes = (1,2), angle=15, reshape=False)
+
+    #rotation 30° without resizing
+    rot30    = rotate(training_imgs, axes = (1,2), angle=30, reshape=False)
+    rot30_gt = rotate(groundtruth_imgs, axes = (1,2), angle=30, reshape=False)
+    
+    #rotation 60° without resizing
+    rot60    = rotate(training_imgs, axes = (1,2), angle=60, reshape=False)
+    rot60_gt = rotate(groundtruth_imgs, axes = (1,2), angle=60, reshape=False)
+
+    augmented_imgs = np.concatenate((augmented_imgs, rot90, rot180, rot270, flipud, fliplr, flip45, 
+                            flip135, gauss, rot45, rot315, rot15, rot30, rot60 ), axis=0, out=None)
+    augmented_gt_imgs = np.concatenate((augmented_gt_imgs, rot90_gt, rot180_gt, rot270_gt, flipud_gt, fliplr_gt,
+             flip45_gt, flip135_gt, gauss_gt, rot45_gt, rot315_gt, rot15_gt, rot30_gt, rot60_gt), axis=0, out=None)
 
     return  augmented_imgs, augmented_gt_imgs 
 

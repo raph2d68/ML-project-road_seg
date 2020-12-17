@@ -90,6 +90,15 @@ $ python run.py
 - **final_submission.csv** contains our final submission for the AIcrowd challenge.
 - **ressources_files/prediction** contains the predicted binary images as stated above 
 
+Latest results on AICrowd : 
+
+| #Submission | F1 Score | Accuracy |
+| --- | --- | --- |
+| 110132 | 0.891 | 0.943 |
+| 110110| 0.875 |  0.924 |
+
+>*Note* : Submission #110132 was made with our latest model, in which we added more image rotations during the data augmentation phase : 15°, 30° and 60°. However, the model training took several hours and we had already submitted our report in the meantime. As the deadline was reached, we did not re-upload our report, which therefore presents the old version of the pre-processing, but we have however uploaded our last version of pre-processing on this GitHub.
+
 ***
 
 # Authors
