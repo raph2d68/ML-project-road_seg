@@ -129,8 +129,5 @@ dmypy.json
 .pyre/
 
 # delete files
-ressource_files/test_set_images/
-ressource_files/training/
 ressource_files/test_folder/
 ressource_files/Report/
-predictions_training/
