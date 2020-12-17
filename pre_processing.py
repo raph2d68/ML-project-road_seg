@@ -1,21 +1,22 @@
-
-from parameters import *
-from helper import *
-from model import model
 import glob
-
 import cv2
-
 import imageio
 import matplotlib.image as mpimg
 import matplotlib as plt
-
 import numpy as np
 import tensorflow as tf
-#import tensorflow_addons as tfa
+
 from scipy import ndimage, misc
+from scipy.ndimage.interpolation import rotate
+
+from parameters import *
+from helper import *
 
 
+# Return a list of images located in file "filename"
+# Input:    filename  folder where image are located
+#           names     list of the names of the files to be loaded
+# Output:    imgs      list of images corresponding to names
 def load_image(filename, names):
     imgs=[]
     for i, idx in enumerate(names) :
@@ -27,96 +28,35 @@ def load_image(filename, names):
             imgs.append(img)
         else:
             print('File ' + image_filename + ' does not exist')
-  
     return imgs
 
 
+# Return a list of names of all png image in a folder, that contain "satImage" in their name
+# Input:    train_data_filename     folder where image are located
+#           TRAINING_SIZE           number of images to select 
+#           rand_bool               if rand_bool==1 images are randomly selected, 
+#                                   else selection depend on their name                 
+# Output:   names                   list of names of selected images 
 def get_data_names( train_data_filename, TRAINING_SIZE, rand_bool ):
-
     names = [os.path.basename(x) for x in glob.glob( train_data_filename +'satImage*.png')]
-    
     if rand_bool:
         names = np.random.permutation(names)[0:TRAINING_SIZE]
     else: 
         names = names[0:TRAINING_SIZE]
-
-    print(names)
     return names
 
 
-
-def create_patches( data ):
-
-    imgs=np.array(data)
-    """Extract the images into a 4D tensor [image index, y, x, channels].
-    Values are rescaled from [0, 255] down to [-0.5, 0.5].
-    """
-    num_images = len(imgs)
-    IMG_WIDTH = imgs[0].shape[0]
-    IMG_HEIGHT = imgs[0].shape[1]
-    N_PATCHES_PER_IMAGE = (IMG_WIDTH/IMG_PATCH_SIZE)*(IMG_HEIGHT/IMG_PATCH_SIZE)
-
-    img_patches = [img_crop(imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_images)]
-    data = [img_patches[i][j] for i in range(len(img_patches)) for j in range(len(img_patches[i]))]
-
-    return np.asarray(data)
-
-
-# Extract label images
-def extract_labels( data ):
-   
-    """Extract the labels into a 1-hot matrix [image index, label index]."""
-    gt_imgs = np.array(data)
-
-    num_images = len(gt_imgs)
-    gt_patches = [img_crop(gt_imgs[i], IMG_PATCH_SIZE, IMG_PATCH_SIZE) for i in range(num_images)]
-    data = np.asarray([gt_patches[i][j] for i in range(len(gt_patches)) for j in range(len(gt_patches[i]))])
-    labels = np.asarray([value_to_class(np.mean(data[i])) for i in range(len(data))])
-
-    # Convert to dense 1-hot representation.
-    return labels.astype(np.float32)
-
-#extraire des carres de w*h de l'image et les mettre les un a la suite des autres dans list_patches
-# Extract patches from a given image
-def img_crop(im, w, h):
-    list_patches = []
-    imgwidth = im.shape[0]
-    imgheight = im.shape[1]
-    is_2d = len(im.shape) < 3
-    for i in range(0, imgheight, h):
-        for j in range(0, imgwidth, w):
-            if is_2d:
-                im_patch = im[j:j+w, i:i+h]
-            else:
-                im_patch = im[j:j+w, i:i+h, :]
-            list_patches.append(im_patch)
-    return list_patches
-
-
-
-'''
-data_dir = 'ressource_files/training/'
-train_data_filename = data_dir + 'images/'
-train_labels_filename = data_dir + 'groundtruth/' 
-
-# Extract it into np arrays.
-train_data = extract_data(train_data_filename, TRAINING_SIZE)
-#train_labels = extract_labels(train_labels_filename, TRAINING_SIZE)
-
-image_dir = data_dir + 'images/'
-groundt_dir = data_dir + 'groundtruth/'
-
-files = os.listdir(image_dir) #return list of files of a directory
-
-''' 
+# Extend the input data by several images transformations
+# Input :   train_data_filename,    Folder containing train data images
+#           train_labels_filename,  Folder containing label data images
+#           names                   List of names of input images 
+# Output :  augmented_imgs,         Augmented input images  [TRAINING_SIZE*11, n, m, 3 ] 
+#           augmented_gt_imgs       Augmented groundtruth images  [TRAINING_SIZE*11, n, m ]
 def augment_data( train_data_filename, train_labels_filename, names ):
-
-  
 
     training_imgs    =  load_image(train_data_filename, names)
     groundtruth_imgs =  load_image(train_labels_filename, names)
    
-
     augmented_imgs = training_imgs
     augmented_gt_imgs = groundtruth_imgs   
 
@@ -124,85 +64,95 @@ def augment_data( train_data_filename, train_labels_filename, names ):
     rot90 = np.rot90( training_imgs, k=1, axes=(1, 2))
     rot90_gt = np.rot90( groundtruth_imgs, k=1, axes=(1, 2))
     
-    #cv2.imwrite('prepro/90.jpg',rot90[0]*255)
-    #cv2.imwrite('prepro/90gt.jpg',rot90_gt[0]*255)
-   
     #rot180
     rot180 = np.rot90( training_imgs, k=2, axes=(1, 2))
     rot180_gt = np.rot90( groundtruth_imgs, k=2, axes=(1, 2))
     
-    #print(np.shape(rot180[0]))
-    #print("rot180_gt", np.shape(rot180_gt[0]))
-    #cv2.imwrite('prepro/180.jpg',rot180[0]*255)
-    #cv2.imwrite('prepro/180_gt.jpg',rot180_gt[0]*255)
-
     #rot270
     rot270 = np.rot90( training_imgs, k=3, axes=(1, 2))
     rot270_gt = np.rot90( groundtruth_imgs, k=3, axes=(1, 2))
-    #cv2.imwrite('prepro/befgrey.jpg',rot90[0])
-    #cv2.imwrite('prepro/befgrey.jpg',rot90_gt[0])
-   
 
-    #vertical flip
+    #up_down flip
     flipud = np.flip( training_imgs,  1 )
     flipud_gt = np.flip( groundtruth_imgs, 1 )
-    #cv2.imwrite('prepro/befgrey.jpg',rot90[0])
-    #cv2.imwrite('prepro/befgrey.jpg',rot90_gt[0])
-    #cv2.imwrite('prepro/flipud.jpg',flipud[0]*255)
-    #cv2.imwrite('prepro/flipud_gt.jpg',flipud_gt[0]*255)
-   
 
     #horizontal flip
     fliplr =    np.flip( training_imgs,  2 )
     fliplr_gt = np.flip( groundtruth_imgs, 2 )
-    #cv2.imwrite('prepro/befgrey.jpg',rot90[0])
-    #cv2.imwrite('prepro/befgrey.jpg',rot90_gt[0])
-    #cv2.imwrite('prepro/fliplr.jpg',fliplr[0]*255)
-    #cv2.imwrite('prepro/fliplr_gt.jpg',fliplr_gt[0]*255)
    
-
     #45° flip
-    flip45 =    flip_to_45( training_imgs )
+    flip45    = flip_to_45( training_imgs )
     flip45_gt = flip_to_45( groundtruth_imgs )
-    #cv2.imwrite('prepro/befgrey.jpg',rot90[0])
-    #cv2.imwrite('prepro/befgrey.jpg',rot90_gt[0])
-    #cv2.imwrite('prepro/flip45.jpg',flip45[0]*255)
-    #cv2.imwrite('prepro/flip45_gt.jpg',flip45_gt[0]*255)
-  
     
     #135° flip
     flip135 =    flip_to_135( training_imgs )
     flip135_gt = flip_to_135( groundtruth_imgs )
-    #cv2.imwrite('prepro/befgrey.jpg',rot90[0])
-    #cv2.imwrite('prepro/befgrey.jpg',rot90_gt[0])
-    #cv2.imwrite('prepro/flip135.jpg',flip135[0]*255)
-    #cv2.imwrite('prepro/flip135_gt.jpg',flip135_gt[0]*255)
-  
-
+    
     #gaussian noise
-    #gauss =     add_gaussian_noise( training_imgs )
-    #gauss_gt =  add_gaussian_noise( groundtruth_imgs )
-  
+    gauss =     add_gaussian_noise( training_imgs )
+    gauss_gt =  groundtruth_imgs
 
+    #rotation a 45°
+    rot45    = imrot(training_imgs,45)
+    rot45_gt = gtrot(groundtruth_imgs,45)
 
-    augmented_imgs = np.concatenate((augmented_imgs, rot90, rot180, rot270, flipud, fliplr, flip45, flip135), axis=0, out=None)
-    augmented_gt_imgs = np.concatenate((augmented_gt_imgs, rot90_gt, rot180_gt, rot270_gt, flipud_gt, fliplr_gt, flip45_gt, flip135_gt), axis=0, out=None)
+    #rotation a -45°
+    rot315    = imrot(training_imgs,-45)
+    rot315_gt = gtrot(groundtruth_imgs,-45)
+    
+    augmented_imgs    = np.concatenate((augmented_imgs, rot90, rot180, rot270, flipud, fliplr, 
+                                                flip45, flip135, gauss, rot45, rot315 ), axis=0, out=None)
 
-    #print("augmented_imgs", augmented_imgs)
-    #print("augmented_gt_imgs",augmented_gt_imgs)
+    augmented_gt_imgs = np.concatenate((augmented_gt_imgs, rot90_gt, rot180_gt, rot270_gt, flipud_gt, fliplr_gt, 
+                                                flip45_gt, flip135_gt, gauss_gt, rot45_gt, rot315_gt), axis=0, out=None)
+
     return  augmented_imgs, augmented_gt_imgs 
 
-def add_gaussian_noise(images):
-    noise = np.random.normal(0, .1, np.shape(images))
-    noise_img = images + np.int_(noise*255)
-    #eventuellement ajouter un clip
-    return noise_img
 
+# Rotate an input image array by "ang"" degree, then crop en resize
+# Input:  images        input data images array  [TRAINING_SIZE, n, m, 3 ]   
+#         ang           angle of rotation in degree
+# Output: rot45_resize  output data images array  [TRAINING_SIZE, n, m, 3 ]  
+def imrot(images,ang) : 
+    rot_45 = rotate(images, axes = (1,2), angle=ang, reshape=True) # rotate + or -45
+
+    down_limit = 140    # down limit to crop is a quarter of the image = 400*1.4/4
+    up_limit = 420      # up limit is 3 quarters = 400*1.4*3/4
+    crop_45 = rot_45[:,down_limit:up_limit,down_limit:up_limit,:] # crop the image
+
+    zoom_factor = 400/crop_45.shape[1]
+    rot45_resize = ndimage.zoom(crop_45, zoom=(1,zoom_factor,zoom_factor,1))
+
+    return rot45_resize
+
+# Rotate an input groundtruth array by "ang"" degree, then crop en resize
+# Input:  images        input data groundtruth array  [TRAINING_SIZE, n, m ]   
+#         ang           angle of rotation in degree
+# Output: rot45_resize  output data groundtruth array  [TRAINING_SIZE, n, m ]
+def gtrot(images,ang) : 
+    rot_45 = rotate(images, axes = (1,2), angle=ang, reshape=True) # rotate + or -45
+
+    down_limit = 140    # down limit to crop is a quarter of the image
+    up_limit = 420      # up limit is 3 quarters
+    crop_45 = rot_45[:,down_limit:up_limit,down_limit:up_limit] # crop the image
+
+    zoom_factor = 400/crop_45.shape[1]
+    rot_45_resize = ndimage.zoom(crop_45, zoom=(1,zoom_factor,zoom_factor))
+
+    return rot_45_resize
+
+# Add gaussian noise to an input data array
+def add_gaussian_noise(images):
+    noise = np.random.normal(0,0.3, np.shape(images))
+    return np.clip(images + np.float32(noise), 0, 1)
+
+# Flip diagonaly an input data array
 def flip_to_45(images):
     fliplr = np.flip(images, 2)
     out = np.rot90(fliplr, k=1, axes=(1, 2)) 
     return out
 
+# Flip diagonaly an input data array
 def flip_to_135(image):
     flipud = np.flip(image, 1)
     out = np.rot90(flipud, k=1, axes=(1, 2)) 
