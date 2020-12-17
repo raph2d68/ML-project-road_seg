@@ -10,7 +10,7 @@ This repository is a learning machine project that aims to detect roads from a s
 
 - **Ressource_folder** contains the test and train images, with their groundtruth.
 
-- **prediction** is a subfolder that contains the images used for the final prediction.
+- **prediction** is a subfolder in the above mentioned that contains the images used for the final prediction.
 
 ## Scripts  : 
 
@@ -25,6 +25,8 @@ This repository is a learning machine project that aims to detect roads from a s
 - **unet.py** contains the unet architecture related functions.
 
 - **ressource_files** folder contains training images, groudtruth images, testing images as well as provided helper functions to generate a submission for the challenge with 16x16 pixel patches.
+
+- **run.py** is the script that was used to generate the final submission of our project, images are available in prediction folder in ressource_files folder.
 
 ## Run instructions
 
