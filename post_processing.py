@@ -45,7 +45,7 @@ def morphological_op( binary_image ):
             for i, angle in enumerate(reduced_angles_means):
                 #opening and then closing for all different angles
                 out_op  = cv2.morphologyEx(binary_image, cv2.MORPH_OPEN, get_kernel(3*width, 2, angle))
-                out_cl  = cv2.morphologyEx(out_op, cv2.MORPH_CLOSE, get_kernel(5*width, 2, angle))
+                out_cl  = cv2.morphologyEx(out_op, cv2.MORPH_CLOSE, get_kernel(4*width, 2, angle))
                 #summing all to input
                 out_img = cv2.bitwise_or(out_img, out_cl/255, mask = None) 
             #round kernel to close   
