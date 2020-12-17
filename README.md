@@ -59,7 +59,7 @@ python prediction.py // run the prediction, and
 ## Results file
 
 - **final_submission.csv** contains our final submission for the AIcrowd challenge.
-
+- **ML_Project_2.pdf** is the report of our study.
 ***
 
 # Authors
