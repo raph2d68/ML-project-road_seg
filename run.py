@@ -47,5 +47,5 @@ else :
   img_pred = [PATH_PREDICTION_DIR + 'prediction_' + str(i+1) + '.png' for i in range(50)]
   mask_to_submission_(PATH_SUBMISSION, *img_pred)
 
-print("Prediction Done")
+print("Submission Done")
             
