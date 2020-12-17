@@ -63,8 +63,8 @@ def make_img_overlay(img, predicted_img):
 # Input:    epo_hist        contain Recall and Precision
 # Output:   f1_s            F1 score  
 def f1_scores(epo_hist):
-    pre = np.array(epo_hist.history['Precision'])
-    rec = np.array(epo_hist.history['Recall'])
+    pre = np.array(epo_hist.history['precision'])
+    rec = np.array(epo_hist.history['recall'])
     f1_s = 2 * pre * rec / (pre + rec)
     return f1_s
 
