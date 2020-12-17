@@ -4,8 +4,6 @@ import numpy as np
 import matplotlib.image as mpimg
 import re
 
-PATH_PREDICTION_DIR = 'ressource_files/prediction/'
-PATH_SUBMISSION = 'final_submission.csv'
 
 
 foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
@@ -37,14 +35,17 @@ def mask_to_submission_(submission_filename, *image_filenames):
         for fn in image_filenames[0:]:
             f.writelines('{}\n'.format(s) for s in mask_to_submission_strings(fn))
 
-# Post-processing try, but wasn't better
-#img_pred_pp = [PATH_PREDICTION_DIR + 'prediction_pp_' + str(i+1) + '.png' for i in range(50)]
-#mask_to_submission_(PATH_SUBMISSION_pp, *img_pred_pp)
+#execute prediction.py
+exec(open(FOLDER_PATH+"/prediction.py").read())
 
-img_pred = [PATH_PREDICTION_DIR + 'prediction_' + str(i+1) + '.png' for i in range(50)]
+#create submission
+if POST_PROCESS:
+  img_pred_pp = [PATH_PREDICTION_DIR + 'prediction_pp_' + str(i+1) + '.png' for i in range(50)]
+  mask_to_submission_(PATH_SUBMISSION, *img_pred_pp)
 
-mask_to_submission_(PATH_SUBMISSION, *img_pred)
+else :
+  img_pred = [PATH_PREDICTION_DIR + 'prediction_' + str(i+1) + '.png' for i in range(50)]
+  mask_to_submission_(PATH_SUBMISSION, *img_pred)
 
-
-            
+print("Prediction Done")
             
