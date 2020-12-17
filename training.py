@@ -21,8 +21,8 @@ def main(argv=None):
     model = unet_model(IMG_SIZE, NUM_CHANNELS, NUM_FILTER, FILTER_SIZE, dropout=0.5)
 
     # Run Model
-    val_split=0.2
-    model, f1_scores = train_model(model, x_train, y_train, BATCH_SIZE, NUM_EPOCHS, val_split)
+    
+    model, f1_scores = train_model(model, x_train, y_train, BATCH_SIZE, NUM_EPOCHS, VALIDATION_SPLIT)
 
     # Save the trained model
     print('Saving trained model')
