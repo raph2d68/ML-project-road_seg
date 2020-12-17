@@ -24,7 +24,7 @@ This repository is a Machine Learning project that aims to detect roads from a s
 
 - **unet.py** contains the unet architecture related functions.
 
-- **predictions** folder contains the predicted binary images, and **visual** folder contains the overlay of the training images and pedictions.
+- **prediction.py** contains the necessary function to predict labels from trained U-net model.
 
 ## Requirements
 
