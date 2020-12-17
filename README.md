@@ -1,16 +1,14 @@
 ***
 # Road Segmentation Project
 
-This repository is a learning machine project that aims to detect roads from a set of satellite images. It implements a U-Net that classifies a set of RGB images, assigning either the label "road" or "background" to each pixel. A training set of 100 satellite road images (400x400 pixels), with their corresponding groundtruths was used. As a test set we used 50 satellite road images (608x608 pixels).
+This repository is a Machine Learning project that aims to detect roads from a set of satellite images. It implements a U-Net algoritm that classifies the input of RGB images set, assigning either the label "road" or "background" to each pixel. A training set of 100 satellite road images (400x400 pixels), with their corresponding groundtruths was used. As a test set we used 50 unlabeled satellite road images (608x608 pixels).
 
 ***
 # Files Details
 
 ## Images : 
 
-- **ressource_files** contains the test and train images, with their groundtruth.
-
-- **prediction** is a subfolder in the above mentioned that contains the images used for the final prediction.
+- **Ressource_folder** contains the test and train images, with their groundtruth.
 
 ## Scripts  : 
 
@@ -26,9 +24,9 @@ This repository is a learning machine project that aims to detect roads from a s
 
 - **ressource_files** folder contains training images, groudtruth images, testing images as well as provided helper functions to generate a submission for the challenge with 16x16 pixel patches.
 
-- **run.py** is the script that was used to generate the final submission of our project, images are available in prediction folder in ressource_files folder.
+- **predictions** folder contains the predicted binary images, and **visual** folder contains the overlay of the training images and pedictions.
 
-## Run instructions
+## Requirements
 
 All scripts have been coded with the following versions :
 
@@ -38,28 +36,48 @@ All scripts have been coded with the following versions :
 - OpenCV 4.4
 - Matplotlib 3.3
 
-Needed packages are available for download in the file ```requirements.txt```.
-
 >*Note:* The training procedure was conducted using Google Colab to access better computing resources, in particular the **12GB NVIDIA Tesla K80 GPU.**
+
+## Run instructions :
 
 Scripts to run :
 
-- **training.py** contains the code used to train the Unet model.
-- **prediction.py** contains the code that generates a prediction from a test images set and a trained model. Toggle the parameter ```bool POSTPROCESS``` to enable or not the post-processing on the predicted images.
+- **training.py** contains the code used to train the U-Net model.
+- **prediction.py** contains the code that generates a prediction from test images and a trained model. Toggle the parameter ```bool POSTPROCESS``` to enable or not the post-processing on the predicted images.
 
-To save time during parameters tuning, the training can be done without submission. Example commands :
+1. Modify your parameters, such as the paths or the epoch numbers in ```parameters.py```
+1. Make sure you have the right packages, have a look at ```requirements.txt``` if necessary.
+1. To save time during parameters tuning, the training can be done without prediction (testing) and submission. The following commands runs the training of the model, and then runs a prediction from the trained model.
+
+First clone the repo and go to your directory.
 
 ```
-git clone <url> // clone the repo
-cd dir
-python training.py // train the model
-python prediction.py // run the prediction, and 
+$ git clone <url> 
+$ cd dir
+```
+
+**1. To run training and prediction separately**
+
+Train the model.
+```
+$ python training.py
+```
+Run the prediction, and run post-processing if enabled.
+```
+$ python prediction.py 
+```
+
+**2. To run training and prediction, and make a submission from test images**
+
+Run the complete project
+```
+$ python run.py
 ```
 
 ## Results file
 
 - **final_submission.csv** contains our final submission for the AIcrowd challenge.
-- **ML_Project_2.pdf** is the report of our study.
+
 ***
 
 # Authors
