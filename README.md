@@ -50,8 +50,8 @@ Scripts :
 Steps to run project :
 
 1. Modify your parameters, such as the paths or the epoch numbers in ```parameters.py```
-1. Make sure you have the right packages, have a look at ```requirements.txt``` if necessary.
-1. To save time during parameters tuning, the training can be done without prediction (testing) and submission : 
+2. Make sure you have the right packages, have a look at ```requirements.txt``` if necessary.
+3. To save time during parameters tuning, the training can be done without prediction (testing) and submission : 
 
 
 First clone the repo and go to your directory.
@@ -67,7 +67,7 @@ Then train the model.
 $ python training.py
 ```
 
-**1. Prediction generation**
+**2. Prediction generation**
 
 
 Run the prediction, and run post-processing if enabled in order to update ressource_files/prediction images.
@@ -76,7 +76,7 @@ $ python prediction.py
 ```
 You can stop here if there is no need for submission procedure. 
 
-**2. Final submission from test images**
+**3. Final submission from test images**
 
 In order to obtain the csv file of our final_submission, use **run.py** without post_processing.
 That will gather images from the ressource_files/prediction folder and generate a submission file.
