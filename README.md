@@ -42,10 +42,10 @@ All scripts have been coded with the following versions :
 
 Scripts :
 
-- **run.py** runs the training of the model, makes a prediction with the test set and makes a submission. 
+- **training.py** contains the code used to train the U-Net model.
 
-    - **training.py** contains the code used to train the U-Net model.
-    - **prediction.py** contains the code that generates a prediction from test images and a trained model. Toggle the parameter ```bool POSTPROCESS``` to enable or not the post-processing on the predicted images.
+- **run.py** makes a prediction with the test set and makes a submission. 
+    - **prediction.py** contains the code that generates a prediction from test images and a trained model. Toggle the parameter ```bool POST_PROCESS``` to enable or not the post-processing on the predicted images.
 
 Steps to run project :
 
@@ -60,19 +60,22 @@ First clone the repo and go to your directory.
 $ git clone <url> 
 $ cd dir
 ```
-
-**1. Run training and prediction separately**
-
-Train the model.
+Then train the model.
 ```
 $ python training.py
 ```
+
+Now you can either make a submission, or simply make a prediction
+
+**1. Run prediction separately from submission**
+
+
 Run the prediction, and run post-processing if enabled.
 ```
 $ python prediction.py 
 ```
 
-**2. Run training and prediction, and make a submission from test images**
+**2. Run prediction, and make a submission from test images**
 
 Run the complete project
 ```
@@ -82,8 +85,7 @@ $ python run.py
 ## Results file
 
 - **final_submission.csv** contains our final submission for the AIcrowd challenge.
-- **ressources_files/prediction** contains the predicted images, as stated above.
-
+- **ressources_files/prediction** contains the predicted binary images as stated above 
 
 ***
 
@@ -92,3 +94,13 @@ $ python run.py
 - Raphaël Ausilio
 - Valentin Bigot
 - Valentin Karam
+
+
+# Reference
+
+### GitHub repositories
+
+
+[EPFML_Project2](https://github.com/ntalabot/EPFML_Project2) 
+
+[EPFL-Machine-Learning-Road-Segmentation](https://https://github.com/zghonda/EPFL-Machine-Learning-Road-Segmentation.google.com) 
