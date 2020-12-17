@@ -14,3 +14,25 @@ Details are provided in the ML-RST-report.pdf
 
 The dataset is available at the [CrowdAI page](https://www.crowdai.org/challenges/epfl-ml-road-segmentation).
 
+# Training 
+
+The training procedure was performed with the use of Google Colab in order to access better computational ressources.
+
+# Files Details
+
+- **final_submission.csv** contains our final submission for the AIcrowd challenge.
+- **helper.py** contains additional functions that were used during the whole procedure.
+- **parameters.py** provides the parameter set for the task.
+- **pre_processing.py** contains images augmentation functions.
+- **post_processing.py** contains functions to improve pixel classification with Hough Transform, kernel tuning and morphological operators.
+- **prediction.py** contains the code to generate a prediction from a test set of images and a trained model.
+- **training.py** contains the code implemented to train the Unet model.
+- **unet.py** contains the unet architecture related functions.
+
+- **ressource_files** folder contains training images, groudtruth images, testing images as well as provided helper functions to generate a submission for the challenge with 16x16 pixel patches.
+
+# Authors 
+
+- Raphaël Ausilio
+- Valentin Bigot
+- Valentin Karam
