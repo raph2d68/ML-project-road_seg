@@ -60,25 +60,27 @@ First clone the repo and go to your directory.
 $ git clone <url> 
 $ cd dir
 ```
+**1. Training of the model**
+
 Then train the model.
 ```
 $ python training.py
 ```
 
-Now you can either make a submission, or simply make a prediction
-
-**1. Run prediction separately from submission**
+**1. Prediction generation**
 
 
 Run the prediction, and run post-processing if enabled in order to update ressource_files/prediction images.
 ```
 $ python prediction.py 
 ```
+You can stop here if there is no need for submission procedure. 
 
-**2. Run prediction, and make a submission from test images**
+**2. Final submission from test images**
 
 In order to obtain the csv file of our final_submission, use **run.py** without post_processing.
 That will gather images from the ressource_files/prediction folder and generate a submission file.
+
 ```
 $ python run.py
 ```
