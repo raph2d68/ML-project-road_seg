@@ -5,6 +5,9 @@ import re
 from helper import *
 from parameters import *
 
+from parameters import *
+import prediction
+
 
 foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
 
@@ -36,7 +39,7 @@ def mask_to_submission_(submission_filename, *image_filenames):
             f.writelines('{}\n'.format(s) for s in mask_to_submission_strings(fn))
 
 #execute prediction.py
-exec(open(FOLDER_PATH+"/prediction.py").read())
+prediction.main()
 
 #create submission
 if POST_PROCESS:
