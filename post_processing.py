@@ -110,7 +110,7 @@ def get_kernel(height , width,  angle):
 def generate_output(image_idx, img, img_prediction ): 
     
     print("IMG Idx prediction", image_idx)
-    dir_supp_images = prediction_training_dir + "visual/"
+    dir_supp_images = prediction_training_dir + "prediction/"
     os.makedirs(dir_supp_images , exist_ok=True)
     os.makedirs(prediction_training_dir, exist_ok=True)
     
