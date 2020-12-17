@@ -1,9 +1,9 @@
-from helper import *
 import os
 import numpy as np
 import matplotlib.image as mpimg
 import re
-
+from helper import *
+from parameters import *
 
 
 foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
