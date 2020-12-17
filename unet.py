@@ -4,6 +4,7 @@ from helper import f1_scores
 
 
 def acti_fct(data):
+    """LeakyReLu activation function design"""
     return tf.keras.layers.LeakyReLU(alpha=0.25)(data)
 
 
@@ -26,6 +27,7 @@ def conv_layers(data, n_filter, filter_size):
 
 
 def down_sample(data, n_filter, filter_size, dropout):
+    """Contraction phase main function"""
     conv = conv_layers(data, n_filter, filter_size)
     pool = tf.keras.layers.MaxPool2D((2, 2))(conv)
     if dropout is not None:
@@ -34,6 +36,7 @@ def down_sample(data, n_filter, filter_size, dropout):
 
 
 def up_sample(data, n_filter, filter_size, dropout):
+    """Expansion phase main function"""
     conv = conv_layers(data, n_filter, filter_size)
     up_ = tf.keras.layers.Conv2DTranspose(n_filter,
                                          filter_size,
