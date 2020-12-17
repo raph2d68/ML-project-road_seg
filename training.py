@@ -7,10 +7,6 @@ from unet import *
 from helper import *
 from parameters import *
 
-#MODIFY IF NECESSARY
-TRAIN_DIR = '/content/gdrive/MyDrive/ML2_Unet/ML-project2/ressource_files/training/'
-PATH_UNET_MODEL = '/content/gdrive/MyDrive/ML2_Unet/ML-project2/model_files/unet.h5'
-
 def main(argv=None):
     train_image_dir = TRAIN_DIR + "images/"
     train_grth_dir = TRAIN_DIR + "groundtruth/"
@@ -38,8 +34,7 @@ def main(argv=None):
     # Save the trained model
     print('Saving trained model')
     model.save(PATH_UNET_MODEL)
-    print("je suis icic")
-    plot_metric_history(f1_scores)
+    # plot_metric_history(f1_scores)
 
     
 
