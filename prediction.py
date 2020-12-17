@@ -1,7 +1,6 @@
 import tensorflow as tf
 import tensorflow.keras as keras
 
-from ressource_files.mask_to_submission import *
 from helper import *
 from post_processing import *
 
@@ -30,7 +29,6 @@ def main(argv=None):
     model = keras.models.load_model(PATH_model)
 
     for idx, path in enumerate(img_test):    
-       
         img = np.squeeze(get_image(path))
         pred = img_predict(img, model)
         pred = np.squeeze(pred).round()
