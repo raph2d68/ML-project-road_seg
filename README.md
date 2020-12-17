@@ -1,7 +1,7 @@
 ***
 # Road Segmentation Project
 
-    This repository is a Machine Learning project that aims to detect roads from a set of satellite images. It implements a U-Net algoritm that classifies the input of RGB images set, assigning either the label "road" or "background" to each pixel. A training set of 100 satellite road images (400x400 pixels), with their corresponding groundtruths was used. As a test set we used 50 unlabeled satellite road images (608x608 pixels).
+   This repository is a Machine Learning project that aims to detect roads from a set of satellite images. It implements a U-Net algoritm that classifies the input of RGB images set, assigning either the label "road" or "background" to each pixel. A training set of 100 satellite road images (400x400 pixels), with their corresponding groundtruths was used. As a test set we used 50 unlabeled satellite road images (608x608 pixels).
 
 ***
 # Files Details
